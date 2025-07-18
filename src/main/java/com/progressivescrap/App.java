@@ -16,7 +16,11 @@ import org.jsoup.select.Elements;
 public class App {
 
     public static void main(String[] args) {
-        final String url = "https://cardfight.fandom.com/wiki/Booster_Set_11:_Seal_Dragons_Unleashed";
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Insira o Link da wiki do produto:");
+        final String url = sc.nextLine();
+        final String baseURI = url.split("/", 2)[0];
+        System.out.println(baseURI);
         try {
             Document document = Jsoup.connect(url).get();
             // list of cards
@@ -30,27 +34,30 @@ public class App {
             // tr:nth-child(1)
 
             String[] teste = content.text().split("");
-
             // System.out.println(content.text());
             // System.out.println(details.text());
             System.out.println(details.first());
-            int quantityCards = Integer.parseInt(teste[0]);
-            int count = 0;
+            details.remove(0);
+            String[] boxPrefix = details.selectFirst("td:nth-child(1)").text().split("/");
+            System.out.println(boxPrefix[0]);
+            Box box = new Box(boxPrefix[0], details.size());
             for (Element e : details) {
-
-                if (!e.select("td:nth-child(1)").text().startsWith("FC"))
+                if (!e.select("td:nth-child(1)").text().startsWith(boxPrefix[0]))
                     break;
                 else {
                     String code = e.select("td:nth-child(1)").text();
                     String name = e.select("td:nth-child(2)").text();
+                    System.out.println(e.select("td:nth-child(2)"));
                     String grade = e.select("td:nth-child(3)").text();
                     String clan = e.select("td:nth-child(4)").text();
                     String type = e.select("td:nth-child(5)").text();
                     String rarity = e.select("td:nth-child(6)").text();
-                    System.out.println(code + ": " + name + " - " + grade + " - " + clan + type +
-                            " - " + rarity);
+                    Card card = new Card(
+                            code, name, type, Integer.parseInt(grade), rarity, 0, 0, rarity, rarity,
+                            rarity, rarity, rarity);
+                    box.addCard(card);
+                    System.out.println(box.getCardsById(code).getName());
                 }
-                count++;
             }
             // int count = 0;
             // String code = "", name = "", grade = "", clan = "", type = "", rarity = "";
