@@ -25,24 +25,13 @@ public class App {
             Document document = Jsoup.connect(url).get();
             // list of cards
             Elements details = document.select("#mw-content-text > div > table.sortable tbody tr");
-            // number of cards
-            Element content = document.selectFirst("#mw-content-text > div > ul > li:nth-child(1)");
 
-            // #mw-content-text > div > table.sortable.jquery-tablesorter > tbody
-            // #mw-content-text > div > table.sortable.jquery-tablesorter > tbody
-            // #mw-content-text > div > table.sortable.jquery-tablesorter > tbody >
-            // tr:nth-child(1)
-
-            String[] teste = content.text().split("");
-            // System.out.println(content.text());
-            // System.out.println(details.text());
-            System.out.println(details.first());
             details.remove(0);
-            String[] boxPrefix = details.selectFirst("td:nth-child(1)").text().split("/");
-            System.out.println(boxPrefix[0]);
-            Box box = new Box(boxPrefix[0], details.size());
+            String boxPrefix = details.selectFirst("td:nth-child(1)").text().split("/")[0];
+            System.out.println(boxPrefix);
+            Box box = new Box(boxPrefix, details.size());
             for (Element e : details) {
-                if (!e.select("td:nth-child(1)").text().startsWith(boxPrefix[0]))
+                if (!e.select("td:nth-child(1)").text().startsWith(boxPrefix))
                     break;
                 else {
                     String code = e.select("td:nth-child(1)").text();
