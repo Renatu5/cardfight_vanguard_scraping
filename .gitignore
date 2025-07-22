@@ -56,3 +56,5 @@ release.properties
 # OS generated files
 .DS_Store
 Thumbs.db
+
+*.txt

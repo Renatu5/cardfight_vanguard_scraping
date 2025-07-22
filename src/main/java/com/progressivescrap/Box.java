@@ -43,4 +43,22 @@ public class Box {
         cards.add(card);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Box {")
+                .append("boxId='").append(boxId).append('\'')
+                .append(", quantityCards=").append(quantityCards)
+                .append(", cards=[");
+
+        for (int i = 0; i < cards.size(); i++) {
+            sb.append(cards.get(i));
+            if (i < cards.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
 }
