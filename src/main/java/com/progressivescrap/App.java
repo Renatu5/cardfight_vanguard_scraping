@@ -3,6 +3,8 @@ package com.progressivescrap;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
 import org.jsoup.Connection.Response;
@@ -11,7 +13,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /**
- * Hello world!
+ * Scraping of wiki fandom of cardgame Cardfight Vanguard
  *
  */
 public class App {
@@ -43,10 +45,12 @@ public class App {
                     System.out.println(source);
                     String rarity = e.select("td:nth-child(6)").text();
                     Card card = getCardProperties(source, code, rarity);
+                    if (card == null)
+                        return;
                     box.addCard(card);
                     // System.out.println(box.getCardsById(code).getName());
                     fw.write(card.toString());
-                    break;
+                    // break;
                 }
             }
         } catch (Exception e) {
@@ -59,49 +63,63 @@ public class App {
             return null;
         try {
             FileWriter fw = new FileWriter("teste.txt");
-            Thread.sleep(1, 3);
+            Thread.sleep(2000, 5000);
             Document document = Jsoup.connect(source).get();
-
             // Testando pegar atributos de forma mais generica - @Renatu5
-            System.out.println(document.select("[title*=grade]").get(1).text());
-            System.out.println(document.select("[title*=skill]").text());
+            // System.out.println(document.select("[title*=grade]"));
+            // System.out.println(document.select("[title~=Drive|Skill]").text());
 
             fw.write((document.body().html()));
-            // Elements properties = document.select("div.info-main > table > tbody");
-            // String name = properties.select("tr:nth-child(1) > td:nth-child(2)").text();
-            // String type = properties.select("tr:nth-child(5) > td:nth-child(2)").text();
-            // String grade = properties.select("tr:nth-child(6) >
-            // td:nth-child(2)").text().split("/")[0].trim();
+            Elements properties = document.select("div.info-main > table > tbody");
+            System.out.println(properties.size());
+            // System.out.println(properties.select("tr").dataNodes());
+            // System.out.println(properties.select("[title~=Drive|Skill]"));
+            // System.out.println(document.select("title*=name"));
+            // System.out.println(properties);
+            String name = properties.select("td:containsOwn(name) + td").text();
+            if (name.equals("Energy"))
+                return null;
+            // System.out.println(name);
+            String type = properties.select("td:containsOwn(Card Type) + td").text();
+            // System.out.println(type);
+            String[] gradeSkill = document.selectFirst("td:containsOwn(grade) + td").text().split("/");
+            String grade = gradeSkill[0].trim();
+            System.out.println(grade);
+            String skill = gradeSkill.length > 1 ? gradeSkill[1].trim():"";
+            System.out.println(skill);
+            Element powerElement = document.selectFirst("td:containsOwn(Power) + td");
+            int power = 0;
+            if (powerElement != null) {
+                power = Integer.parseInt(powerElement.text().replaceAll("\\D", ""));
+            }
 
-            // System.out.println(properties.select("categories-top-more-4").text());
-
-            // String skill = properties.select("tr:nth-child(6) >
-            // td:nth-child(2)").text().split("/")[1].trim();
-            // int power = Integer.parseInt(properties.select("tr:nth-child(7) >
-            // td:nth-child(2)").text());
-            // int critical = Integer.parseInt(properties.select("tr:nth-child(8) >
-            // td:nth-child(2)").text());
-            // String nation = properties.select("tr:nth-child(9) >
-            // td:nth-child(2)").text();
-            // String clan = properties.select("tr:nth-child(10) > td:nth-child(2)").text();
-            // String race = properties.select("tr:nth-child(11) > td:nth-child(2)").text();
-            // String format = properties.select("tr:nth-child(12) >
-            // td:nth-child(2)").text();
-            // String cardEffect = document.select("div.info-extra > table.effect > tbody >
-            // tr:nth-child(2) > td").text();
-            // Card card = new Card(
-            // code, name, type, grade, skill, power, critical, nation, clan, race, format,
-            // cardEffect,
-            // source, rarity);
-            // System.out.println(card.toString());
-            // Card card = new Card(source, source, source, 0, source, 0, 0, source, source,
-            // source, source, source,
-            // source);
-            // return card;
+            Element criticalElement = document.selectFirst("td:containsOwn(Critical) + td");
+            int critical = 0;
+            if (criticalElement != null) {
+                critical = Integer.parseInt(criticalElement.text().replaceAll("\\D", ""));
+            }
+            // System.out.println(critical);
+            String nation = properties.select("td:containsOwn(Nation) + td").text();
+            // System.out.println(nation);
+            String clan = properties.select("td:containsOwn(Clan) + td").text();
+            // System.out.println(clan);
+            String race = properties.select("td:containsOwn(Race) + td").text();
+            // System.out.println(race);
+            String format = properties.select("td:containsOwn(format) + td").text();
+            // System.out.println(format);
+            String cardEffect = document.select("div.info-extra > table.effect > tbody > tr:nth-child(2) > td").text();
+            // System.out.println(cardEffect);
+            Card card = new Card(code, name, type, grade, skill, power, critical, nation, clan,
+                    race, format, cardEffect,
+                    source, rarity);
+            System.out.println(card.toString());
+            return card;
         } catch (Exception e) {
             System.err.println(e);
-
         }
         return null;
     }
 }
+// //*[@id="mw-content-text"]/div/div/div[2]/div[2]/table/tbody/tr[1]/td[2]
+// skill
+// drive
